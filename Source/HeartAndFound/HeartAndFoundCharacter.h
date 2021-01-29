@@ -27,13 +27,13 @@ protected:
 	float MaxTemperature;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Heart")
-	float DefaultDrainRate = 1.0F;
+	float DefaultDrainRate;
 
 private:
 	float CurrentTemperature;
 
-private:
-	void DrainTemperature(float DeltaSeconds);
+public:
+	void ChangeTemperature(float InAmount);
 
 protected:
 
@@ -54,6 +54,10 @@ protected:
 public:
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	void AddTemperatureChangeRate(float InAmount);
+	void RemoveTemperatureChangeRate(float InAmount);
+
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	/** Returns CameraBoom subobject **/

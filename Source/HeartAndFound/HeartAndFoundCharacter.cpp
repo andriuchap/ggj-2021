@@ -46,6 +46,8 @@ AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjIn
 
 	MaxTemperature = 100.0F;
 	CurrentTemperature = MaxTemperature;
+
+	DefaultDrainRate = 1.0F;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -65,17 +67,16 @@ void AHeartAndFoundCharacter::SetupPlayerInputComponent(class UInputComponent* P
 void AHeartAndFoundCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	DrainTemperature(DeltaSeconds);
+	ChangeTemperature(-DefaultDrainRate * DeltaSeconds);
 }
 
-void AHeartAndFoundCharacter::DrainTemperature(float DeltaSeconds)
+void AHeartAndFoundCharacter::ChangeTemperature(float InAmount)
 {
 	if (!IsDead())
 	{
-		CurrentTemperature -= DefaultDrainRate * DeltaSeconds;
-		if (CurrentTemperature <= 0.0F)
+		CurrentTemperature = FMath::Clamp(InAmount + CurrentTemperature, 0.0F, MaxTemperature);
+		if (CurrentTemperature == 0.0F)
 		{
-			CurrentTemperature = 0.0F;
 			StopJumping();
 		}
 	}
