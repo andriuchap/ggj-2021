@@ -23,6 +23,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Heart")
+	float MaxTemperature;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Heart")
+	float DefaultDrainRate = 1.0F;
+
+private:
+	float CurrentTemperature;
+
+private:
+	void DrainTemperature(float DeltaSeconds);
+
 protected:
 
 	/** Called for side to side input */
@@ -41,8 +53,17 @@ protected:
 
 public:
 
+	virtual void Tick(float DeltaSeconds) override;
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+	FORCEINLINE bool IsDead() { return CurrentTemperature <= 0.0F; }
+
+	UFUNCTION(BlueprintPure, Category = "Heart")
+	FORCEINLINE float GetMaxTemperature() { return MaxTemperature; }
+
+	UFUNCTION(BlueprintPure, Category = "Heart")
+	FORCEINLINE float GetCurrentTemperature() { return CurrentTemperature; }
 };

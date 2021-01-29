@@ -43,6 +43,9 @@ AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjIn
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	MaxTemperature = 100.0F;
+	CurrentTemperature = MaxTemperature;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -59,20 +62,48 @@ void AHeartAndFoundCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindTouch(IE_Released, this, &AHeartAndFoundCharacter::TouchStopped);
 }
 
+void AHeartAndFoundCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	DrainTemperature(DeltaSeconds);
+}
+
+void AHeartAndFoundCharacter::DrainTemperature(float DeltaSeconds)
+{
+	if (!IsDead())
+	{
+		CurrentTemperature -= DefaultDrainRate * DeltaSeconds;
+		if (CurrentTemperature <= 0.0F)
+		{
+			CurrentTemperature = 0.0F;
+			StopJumping();
+		}
+	}
+}
+
 void AHeartAndFoundCharacter::MoveRight(float Value)
 {
 	// add movement in that direction
-	AddMovementInput(FVector(0.f,-1.f,0.f), Value);
+	if (!IsDead())
+	{
+		AddMovementInput(FVector(0.f, -1.f, 0.f), Value);
+	}
 }
 
 void AHeartAndFoundCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
 	// jump on any touch
-	Jump();
+	if (!IsDead())
+	{
+		Jump();
+	}
 }
 
 void AHeartAndFoundCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
-	StopJumping();
+	if (!IsDead())
+	{
+		StopJumping();
+	}
 }
 
