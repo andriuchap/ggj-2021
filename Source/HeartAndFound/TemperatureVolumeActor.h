@@ -21,14 +21,14 @@ protected:
 		class UBoxComponent* BoxComponent;
 
 	// How fast will the temperature decrease
-	UPROPERTY(EditDefaultsOnly, Category = "Cold")
+	UPROPERTY(EditAnywhere, Category = "Cold")
 		float TemperatureChangeRate;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Cold")
+	UPROPERTY(EditAnywhere, Category = "Cold")
 		bool bLimitAmount;
 
 	// How much temperature the area can decrease
-	UPROPERTY(EditDefaultsOnly, Category = "Cold")
+	UPROPERTY(EditAnywhere, Category = "Cold")
 		float TemperatureAmount;
 
 private:

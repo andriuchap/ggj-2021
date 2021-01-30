@@ -23,14 +23,35 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+	UPROPERTY(EditAnywhere, Category = Camera)
+		FVector CameraOffsetWhenMoving;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Heart")
 	float MaxTemperature;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Heart")
 	float DefaultDrainRate;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Heart")
+	float JumpTemperatureCost;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Heart")
+	int MaxBloodAmmo;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Heart")
+		float ThrowCooldown;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Heart")
+	TSubclassOf<class ABloodProjectile> BloodProjectileClass;
+
 private:
 	float CurrentTemperature;
+
+	float BaseArmLength;
+
+	int BloodAmmo;
+	bool bCanThrowBlood;
+	FTimerHandle TimerHandle_BloodThrow;
 
 public:
 	void ChangeTemperature(float InAmount);
@@ -40,23 +61,21 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Val);
 
-	/** Handle touch inputs. */
-	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
-
-	/** Handle touch stop event. */
-	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
+	void ThrowBlood();
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
 
-
+	virtual void BeginPlay() override;
 public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	void AddTemperatureChangeRate(float InAmount);
-	void RemoveTemperatureChangeRate(float InAmount);
+	virtual void Jump() override;
+
+	void AllowThrow();
+	void AddAmmo(int InAmount);
 
 	/** Returns SideViewCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
@@ -70,4 +89,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Heart")
 	FORCEINLINE float GetCurrentTemperature() { return CurrentTemperature; }
+
+	UFUNCTION(BlueprintPure, Category = "Heart")
+	FORCEINLINE float GetAmmoPercentage() { return (float)BloodAmmo / MaxBloodAmmo; }
 };

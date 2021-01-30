@@ -6,6 +6,9 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "BloodProjectile.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
 
 AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjInitializer)
 {
@@ -25,6 +28,7 @@ AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjIn
 	CameraBoom->TargetArmLength = 500.f;
 	CameraBoom->SocketOffset = FVector(0.f,0.f,75.f);
 	CameraBoom->SetRelativeRotation(FRotator(0.f,180.f,0.f));
+	CameraBoom->bEnableCameraLag = true;
 
 	// Create a camera and attach to boom
 	SideViewCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("SideViewCamera"));
@@ -44,10 +48,22 @@ AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjIn
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
+	CameraOffsetWhenMoving = FVector(0.0F, 275.0F, 275.0F);
+
 	MaxTemperature = 100.0F;
 	CurrentTemperature = MaxTemperature;
 
 	DefaultDrainRate = 1.0F;
+
+	JumpTemperatureCost = 5.0F;
+
+	MaxBloodAmmo = 100;
+	BloodAmmo = 0;
+
+	ThrowCooldown = 0.5F;
+	bCanThrowBlood = true;
+
+	BloodProjectileClass = ABloodProjectile::StaticClass();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -56,18 +72,55 @@ AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjIn
 void AHeartAndFoundCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// set up gameplay key bindings
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AHeartAndFoundCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHeartAndFoundCharacter::MoveRight);
+}
 
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AHeartAndFoundCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AHeartAndFoundCharacter::TouchStopped);
+void AHeartAndFoundCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	BaseArmLength = CameraBoom->TargetArmLength;
 }
 
 void AHeartAndFoundCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	ChangeTemperature(-DefaultDrainRate * DeltaSeconds);
+
+	float MaxSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	FVector Velocity = GetCharacterMovement()->Velocity;
+	float HParam = ((Velocity.Y / MaxSpeed) + 1) * 0.5F;
+	float HCameraDistance = FMath::Lerp<float>(-CameraOffsetWhenMoving.Y, CameraOffsetWhenMoving.Y, HParam);
+	CameraBoom->TargetOffset.Y = HCameraDistance;
+
+	FVector CharLocation = GetActorLocation();
+	float AdditionalArmLength = FMath::Lerp<float>(0.0F, 1800.0F, FMath::Clamp<float>((CharLocation.Z - 200.0F) / 800.0F, 0.0F, 1.0F));
+	CameraBoom->TargetOffset.X = AdditionalArmLength;
+}
+
+void AHeartAndFoundCharacter::Jump()
+{
+	if (!IsDead())
+	{
+		Super::Jump();
+		ChangeTemperature(-JumpTemperatureCost);
+	}
+}
+
+void AHeartAndFoundCharacter::AllowThrow()
+{
+	bCanThrowBlood = true;
+}
+
+void AHeartAndFoundCharacter::AddAmmo(int InAmount)
+{
+	BloodAmmo += InAmount;
+	if (BloodAmmo > MaxBloodAmmo)
+	{
+		BloodAmmo = MaxBloodAmmo;
+	}
 }
 
 void AHeartAndFoundCharacter::ChangeTemperature(float InAmount)
@@ -91,20 +144,19 @@ void AHeartAndFoundCharacter::MoveRight(float Value)
 	}
 }
 
-void AHeartAndFoundCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
+void AHeartAndFoundCharacter::ThrowBlood()
 {
-	// jump on any touch
-	if (!IsDead())
+	if (bCanThrowBlood && BloodAmmo > 0)
 	{
-		Jump();
-	}
-}
+		bCanThrowBlood = false;
+		BloodAmmo--;
+		// Spawn projectile
 
-void AHeartAndFoundCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (!IsDead())
-	{
-		StopJumping();
+
+
+		ABloodProjectile* BloodProj = GetWorld()->SpawnActor<ABloodProjectile>(BloodProjectileClass, );
+
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BloodThrow, this, &AHeartAndFoundCharacter::AllowThrow, ThrowCooldown);
 	}
 }
 
