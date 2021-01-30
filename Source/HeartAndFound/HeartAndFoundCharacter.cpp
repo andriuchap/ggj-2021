@@ -9,6 +9,7 @@
 #include "BloodProjectile.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Components/SphereComponent.h"
 
 AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjInitializer)
 {
@@ -75,6 +76,8 @@ void AHeartAndFoundCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AHeartAndFoundCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHeartAndFoundCharacter::MoveRight);
+
+	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &AHeartAndFoundCharacter::ThrowBlood);
 }
 
 void AHeartAndFoundCharacter::BeginPlay()
@@ -152,9 +155,20 @@ void AHeartAndFoundCharacter::ThrowBlood()
 		BloodAmmo--;
 		// Spawn projectile
 
+		FVector Direction = FVector(0.0F, FMath::Sign(GetCapsuleComponent()->GetForwardVector().Y), 0.0);
+		FVector SpawnLocation = GetCapsuleComponent()->GetComponentLocation() + Direction * (GetCapsuleComponent()->GetScaledCapsuleRadius() + 64.0F);
 
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Instigator = this;
+		SpawnParams.Owner = this;
 
-		ABloodProjectile* BloodProj = GetWorld()->SpawnActor<ABloodProjectile>(BloodProjectileClass, );
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(SpawnLocation);
+		SpawnTransform.SetRotation(Direction.ToOrientationQuat());
+
+		ABloodProjectile* BloodProj = GetWorld()->SpawnActor<ABloodProjectile>(BloodProjectileClass, SpawnTransform, SpawnParams);
+
+		BloodProj->GetCollisionSphere()->IgnoreActorWhenMoving(this, true);
 
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BloodThrow, this, &AHeartAndFoundCharacter::AllowThrow, ThrowCooldown);
 	}

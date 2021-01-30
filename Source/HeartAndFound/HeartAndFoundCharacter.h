@@ -75,6 +75,7 @@ public:
 	virtual void Jump() override;
 
 	void AllowThrow();
+	UFUNCTION(BlueprintCallable, Category = "Heart")
 	void AddAmmo(int InAmount);
 
 	/** Returns SideViewCameraComponent subobject **/
