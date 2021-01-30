@@ -68,6 +68,9 @@ protected:
 	// End of APawn interface
 
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Heart")
+	void OnThrowBlood();
 public:
 
 	virtual void Tick(float DeltaSeconds) override;

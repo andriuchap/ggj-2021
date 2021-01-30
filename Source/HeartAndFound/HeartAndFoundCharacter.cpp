@@ -171,6 +171,7 @@ void AHeartAndFoundCharacter::ThrowBlood()
 		BloodProj->GetCollisionSphere()->IgnoreActorWhenMoving(this, true);
 
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BloodThrow, this, &AHeartAndFoundCharacter::AllowThrow, ThrowCooldown);
+		OnThrowBlood();
 	}
 }
 
