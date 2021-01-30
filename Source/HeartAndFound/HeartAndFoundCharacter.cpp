@@ -155,8 +155,10 @@ void AHeartAndFoundCharacter::ThrowBlood()
 		BloodAmmo--;
 		// Spawn projectile
 
-		FVector Direction = FVector(0.0F, FMath::Sign(GetCapsuleComponent()->GetForwardVector().Y), 0.0);
-		FVector SpawnLocation = GetCapsuleComponent()->GetComponentLocation() + Direction * (GetCapsuleComponent()->GetScaledCapsuleRadius() + 64.0F);
+		FVector Direction = FVector(0.0F, FMath::Sign(GetCapsuleComponent()->GetForwardVector().Y), 0.5F).GetSafeNormal();
+		FVector SpawnLocation = GetCapsuleComponent()->GetComponentLocation() + Direction * (GetCapsuleComponent()->GetScaledCapsuleRadius() + 70.0F);
+
+		//Direction.Z = 1.0F;
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Instigator = this;
