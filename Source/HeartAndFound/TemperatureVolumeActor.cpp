@@ -12,7 +12,7 @@ ATemperatureVolumeActor::ATemperatureVolumeActor(const FObjectInitializer &ObjIn
 	PrimaryActorTick.bCanEverTick = true;
 
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-	BoxComponent->SetCollisionProfileName(FName("OverlapOnlyPawn"));
+	BoxComponent->SetCollisionProfileName(FName("OverlapAllDynamic"));
 	BoxComponent->SetGenerateOverlapEvents(true);
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ATemperatureVolumeActor::OnBoxBeginOverlap);
 	BoxComponent->OnComponentEndOverlap.AddDynamic(this, &ATemperatureVolumeActor::OnBoxEndOverlap);

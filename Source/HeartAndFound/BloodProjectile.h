@@ -30,4 +30,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	FORCEINLINE USphereComponent* GetCollisionSphere() { return CollisionSphere; }
+	FORCEINLINE UProjectileMovementComponent* GetMovementComp() { return ProjectileMovement; }
 };
