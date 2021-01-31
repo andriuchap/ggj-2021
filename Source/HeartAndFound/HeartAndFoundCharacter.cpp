@@ -134,6 +134,7 @@ void AHeartAndFoundCharacter::ChangeTemperature(float InAmount)
 		if (CurrentTemperature == 0.0F)
 		{
 			StopJumping();
+			OnDied();
 		}
 	}
 }

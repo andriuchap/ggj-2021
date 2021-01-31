@@ -71,6 +71,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Heart")
 	void OnThrowBlood();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Heart")
+	void OnDied();
 public:
 
 	virtual void Tick(float DeltaSeconds) override;
