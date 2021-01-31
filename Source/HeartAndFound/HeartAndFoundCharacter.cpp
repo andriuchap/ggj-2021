@@ -65,6 +65,8 @@ AHeartAndFoundCharacter::AHeartAndFoundCharacter(const FObjectInitializer& ObjIn
 	bCanThrowBlood = true;
 
 	BloodProjectileClass = ABloodProjectile::StaticClass();
+
+	bWin = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -90,7 +92,10 @@ void AHeartAndFoundCharacter::BeginPlay()
 void AHeartAndFoundCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	ChangeTemperature(-DefaultDrainRate * DeltaSeconds);
+	if (!bWin)
+	{
+		ChangeTemperature(-DefaultDrainRate * DeltaSeconds);
+	}
 
 	float MaxSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	FVector Velocity = GetCharacterMovement()->Velocity;

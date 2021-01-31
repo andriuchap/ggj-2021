@@ -44,6 +44,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Heart")
 	TSubclassOf<class ABloodProjectile> BloodProjectileClass;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Heart");
+	bool bWin;
+
 private:
 	float CurrentTemperature;
 
